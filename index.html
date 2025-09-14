@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Program Generator</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none !important; }
+            .program-container { margin-top: 0; }
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.4;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .generator-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .app-title {
+            text-align: center;
+            color: #ff6b35;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff6b35;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-sizing: border-box;
+        }
+        
+        select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        select option {
+            background: #333;
+            color: white;
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+            margin-top: 20px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+        }
+        
+        .program-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .program-title {
+            text-align: center;
+            color: #ff6b35;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .week {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #ff6b35;
+        }
+        
+        .week h2 {
+            color: #ff6b35;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .deload h2 {
+            color: #4CAF50;
+        }
+        
+        .peak h2 {
+            color: #f44336;
+        }
+        
+        .deload {
+            border-left-color: #4CAF50;
+        }
+        
+        .peak {
+            border-left-color: #f44336;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: rgba(255, 107, 53, 0.8);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .weight {
+            font-weight: bold;
+            color: #ff6b35;
+        }
+        
+        .notes {
+            margin-top: 30px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .notes h3 {
+            color: #ff6b35;
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .notes ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .notes li {
+            margin-bottom: 8px;
+        }
+        
+        .print-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            
+            .program-container {
+                background: white;
+                box-shadow: none;
+                border: none;
+            }
+            
+            .week {
+                background: #f9f9f9;
+                border-left: 4px solid #333;
+            }
+            
+            .deload {
+                border-left-color: #666;
+            }
+            
+            .peak {
+                border-left-color: #000;
+            }
+            
+            .program-title, .week h2, .notes h3 {
+                color: black;
+            }
+            
+            th {
+                background: #333;
+            }
+            
+            .weight {
+                color: black;
+                font-weight: bold;
+            }
+            
+            .notes {
+                background: #f0f0f0;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="generator-panel no-print">
+            <h1 class="app-title">Training Program Generator</h1>
+            
+            <form id="programForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="exerciseName">Exercise Name</label>
+                        <input type="text" id="exerciseName" placeholder="e.g., Deadlift, Bench Press" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="oneRM">1RM (kg)</label>
+                        <input type="number" id="oneRM" placeholder="e.g., 240" step="0.5" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="programType">Program Type</label>
+                        <select id="programType" required>
+                            <option value="">Select Program</option>
+                            <option value="4week">4-Week Standard</option>
+                            <option value="8week">8-Week Extended</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="generate-btn">🔥 Generate Program</button>
+            </form>
+        </div>
+        
+        <div id="programContainer" class="program-container">
+            <div id="programContent"></div>
+            <button class="print-btn no-print" onclick="window.print()">🖨️ PRINT PROGRAM</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('programForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const exerciseName = document.getElementById('exerciseName').value;
+            const oneRM = parseFloat(document.getElementById('oneRM').value);
+            const programType = document.getElementById('programType').value;
+            
+            let programHTML = '';
+            
+            if (programType === '4week') {
+                programHTML = generate4WeekProgram(exerciseName, oneRM);
+            } else if (programType === '8week') {
+                programHTML = generate8WeekProgram(exerciseName, oneRM);
+            }
+            
+            document.getElementById('programContent').innerHTML = programHTML;
+            document.getElementById('programContainer').style.display = 'block';
+            
+            // Scroll to program
+            document.getElementById('programContainer').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        function generate4WeekProgram(exerciseName, oneRM) {
+            return `
+                <h1 class="program-title">${exerciseName} Program<br>1RM = ${oneRM}kg</h1>
+                
+                <div class="week">
+                    <h2>Week 1</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>82%</td>
+                                <td class="weight">${(oneRM * 0.82).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Top Set</td>
+                                <td>2 x 1</td>
+                                <td>89%</td>
+                                <td class="weight">${(oneRM * 0.89).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Back-Off</td>
+                                <td>2 x 5</td>
+                                <td>78%</td>
+                                <td class="weight">${(oneRM * 0.78).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 2</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>86%</td>
+                                <td class="weight">${(oneRM * 0.86).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>75%</td>
+                                <td class="weight">${(oneRM * 0.75).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Top Set</td>
+                                <td>2 x 1</td>
+                                <td>94%</td>
+                                <td class="weight">${(oneRM * 0.94).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Back-Off</td>
+                                <td>3 x 5</td>
+                                <td>78%</td>
+                                <td class="weight">${(oneRM * 0.78).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 3</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>89%</td>
+                                <td class="weight">${(oneRM * 0.89).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>75%</td>
+                                <td class="weight">${(oneRM * 0.75).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Top Set</td>
+                                <td>1 x 1</td>
+                                <td>95%</td>
+                                <td class="weight">${(oneRM * 0.95).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Back-Off 1</td>
+                                <td>3 x 5</td>
+                                <td>80%</td>
+                                <td class="weight">${(oneRM * 0.80).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Back-Off 2</td>
+                                <td>1 x 5</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week deload">
+                    <h2>Week 4 (Deload / Peak Week)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>82%</td>
+                                <td class="weight">${(oneRM * 0.82).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Top Set</td>
+                                <td>1 x 1</td>
+                                <td>98-100%</td>
+                                <td class="weight">${(oneRM * 0.98).toFixed(1)} – ${oneRM}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notes">
+                    <h3>Program Notes</h3>
+                    <ul>
+                        <li><strong>1RM:</strong> ${oneRM}kg</li>
+                        <li><strong>Training Frequency:</strong> 2x per week</li>
+                        <li><strong>Rest:</strong> 3-5 minutes between sets</li>
+                        <li><strong>Warm-up:</strong> Ensure proper warm-up before each session</li>
+                        <li><strong>Week 4:</strong> Deload first session, peak attempt second session</li>
+                        <li><strong>Progression:</strong> Follow percentages exactly as programmed</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function generate8WeekProgram(exerciseName, oneRM) {
+            return `
+                <h1 class="program-title">${exerciseName} Program<br>1RM = ${oneRM}kg (8-Week Version)</h1>
+                
+                <div class="week">
+                    <h2>Week 1</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>82%</td>
+                                <td class="weight">${(oneRM * 0.82).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 2</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>2 x 1</td>
+                                <td>89%</td>
+                                <td class="weight">${(oneRM * 0.89).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>2 x 5</td>
+                                <td>78%</td>
+                                <td class="weight">${(oneRM * 0.78).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 3</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>86%</td>
+                                <td class="weight">${(oneRM * 0.86).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>75%</td>
+                                <td class="weight">${(oneRM * 0.75).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 4</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>2 x 1</td>
+                                <td>94%</td>
+                                <td class="weight">${(oneRM * 0.94).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>3 x 5</td>
+                                <td>78%</td>
+                                <td class="weight">${(oneRM * 0.78).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 5</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>89%</td>
+                                <td class="weight">${(oneRM * 0.89).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>75%</td>
+                                <td class="weight">${(oneRM * 0.75).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week">
+                    <h2>Week 6</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 1</td>
+                                <td>95%</td>
+                                <td class="weight">${(oneRM * 0.95).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off 1</td>
+                                <td>3 x 5</td>
+                                <td>80%</td>
+                                <td class="weight">${(oneRM * 0.80).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off 2</td>
+                                <td>1 x 5</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week deload">
+                    <h2>Week 7 (Deload)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 3</td>
+                                <td>82%</td>
+                                <td class="weight">${(oneRM * 0.82).toFixed(1)}</td>
+                            </tr>
+                            <tr>
+                                <td>Back-Off</td>
+                                <td>3 x 6</td>
+                                <td>70%</td>
+                                <td class="weight">${(oneRM * 0.70).toFixed(1)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="week peak">
+                    <h2>Week 8 (Peak Week)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Exercise Type</th>
+                                <th>Sets x Reps</th>
+                                <th>% of 1RM</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Top Set</td>
+                                <td>1 x 1</td>
+                                <td>98-100%</td>
+                                <td class="weight">${(oneRM * 0.98).toFixed(1)} – ${oneRM}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notes">
+                    <h3>Program Notes</h3>
+                    <ul>
+                        <li><strong>1RM:</strong> ${oneRM}kg</li>
+                        <li><strong>Training Frequency:</strong> 1x per week</li>
+                        <li><strong>Rest:</strong> 3-5 minutes between sets</li>
+                        <li><strong>Warm-up:</strong> Ensure proper warm-up before each session</li>
+                        <li><strong>Week 7:</strong> Serves as a deload week for recovery</li>
+                        <li><strong>Week 8:</strong> Peak/test week for attempting your 1RM</li>
+                        <li><strong>Tip:</strong> Maintain movement patterns on other training days</li>
+                    </ul>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
